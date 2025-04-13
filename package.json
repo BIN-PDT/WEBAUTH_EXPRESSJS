@@ -1,0 +1,17 @@
+{
+	"name": "webauth_expressjs",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"start": "node ./src/app.mjs",
+		"start:dev": "node --watch ./src/app.mjs"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"type": "module",
+	"dependencies": {
+		"express": "^5.1.0"
+	}
+}

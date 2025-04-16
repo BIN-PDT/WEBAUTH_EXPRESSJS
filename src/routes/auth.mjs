@@ -4,6 +4,7 @@ import APIResponse from "../schemas/api-response.mjs";
 import SchemaValidator from "../middlewares/schema-validator.mjs";
 import UserSignupSchemaValidation from "../schemas/user-signup.mjs";
 import User from "../models/user.mjs";
+import { hashPassword } from "../utils/password.mjs";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.post(
 				.send(response);
 
 		try {
+			cleanedData.password = await hashPassword(cleanedData.password);
 			const newUser = await User.create(cleanedData);
 			return res
 				.setMessage("Signed up successfully.")

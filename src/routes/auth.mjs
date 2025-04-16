@@ -5,6 +5,8 @@ import SchemaValidator from "../middlewares/schema-validator.mjs";
 import UserSignupSchemaValidation from "../schemas/user-signup.mjs";
 import User from "../models/user.mjs";
 import { hashPassword } from "../utils/password.mjs";
+import SessionAuth from "../middlewares/session-auth.mjs";
+import { isSignedOut } from "../middlewares/check-auth.mjs";
 
 const router = Router();
 
@@ -38,5 +40,12 @@ router.post(
 		}
 	}
 );
+
+router.post("/signin", isSignedOut, SessionAuth, (request, response) => {
+	return new APIResponse(200)
+		.setMessage("Signed in successfully.")
+		.setData(request.user)
+		.send(response);
+});
 
 export default router;

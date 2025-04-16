@@ -3,8 +3,8 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"start": "node ./src/app.mjs",
-		"start:dev": "node --watch ./src/app.mjs"
+		"start": "node --env-file=.env ./src/app.mjs",
+		"start:dev": "node --env-file=.env --watch ./src/app.mjs"
 	},
 	"keywords": [],
 	"author": "",
@@ -12,6 +12,8 @@
 	"description": "",
 	"type": "module",
 	"dependencies": {
-		"express": "^5.1.0"
+		"express": "^5.1.0",
+		"express-validator": "^7.2.1",
+		"mongoose": "^8.13.2"
 	}
 }

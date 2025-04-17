@@ -4,8 +4,10 @@ import APIResponse from "../schemas/api-response.mjs";
 import SchemaValidator from "../middlewares/schema-validator.mjs";
 import UserSignupSchemaValidation from "../schemas/user-signup.mjs";
 import User from "../models/user.mjs";
+import RevokedToken from "../models/revoked-token.mjs";
 import { hashPassword } from "../utils/password.mjs";
 import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
+import JWTAuth from "../middlewares/jwt-auth.mjs";
 import { IsSignedIn, IsSignedOut } from "../middlewares/check-auth.mjs";
 
 const router = Router();
@@ -58,6 +60,19 @@ router.post("/jwt/signin", JWTLocalAuth, (request, response) => {
 		.setMessage("Signed in successfully.")
 		.setData(request.tokens)
 		.send(response);
+});
+
+router.get("/jwt/signout", JWTAuth, (request, response, next) => {
+	const { payload } = request;
+
+	const expiresAt = new Date(payload.exp * 1000);
+	RevokedToken.create({ jti: payload.jti, expiresAt: expiresAt })
+		.then((_) =>
+			new APIResponse(200)
+				.setMessage("Signed out successfully.")
+				.send(response)
+		)
+		.catch((error) => next(error));
 });
 
 export default router;

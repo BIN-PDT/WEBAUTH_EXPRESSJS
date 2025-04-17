@@ -6,6 +6,7 @@ import MongoStore from "connect-mongo";
 import passport from "passport";
 import router from "./routes/index.mjs";
 import "./strategies/local.mjs";
+import "./strategies/jwt.mjs";
 
 await mongoose.connect(process.env.DATABASE_URI);
 

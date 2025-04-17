@@ -9,7 +9,7 @@ import { hashPassword } from "../utils/password.mjs";
 import { createTokenPair, revokeToken } from "../utils/jwt.mjs";
 import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
 import JWTAuth from "../middlewares/jwt-auth.mjs";
-import { IsSignedIn, IsSignedOut } from "../middlewares/check-auth.mjs";
+import { IsSignedIn, IsSignedOut } from "../middlewares/session-validator.mjs";
 import RefreshTokenValidator from "../middlewares/refresh-token-validator.mjs";
 
 const router = Router();

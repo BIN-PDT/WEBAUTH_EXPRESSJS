@@ -5,17 +5,14 @@ import { comparePassword } from "../utils/password.mjs";
 
 passport.use(
 	"local",
-	new Strategy(async (username, password, done) => {
-		const findUser = await User.findOne({ username });
-		if (
-			!findUser ||
-			!(await comparePassword(password, findUser.password))
-		) {
-			const error = { statusCode: 401, message: "Invalid credentials." };
-			done(error, false);
-			return;
-		}
-		done(null, findUser);
+	new Strategy((username, password, done) => {
+		User.findOne({ username })
+			.then(async (user) => {
+				if (!user || !(await comparePassword(password, user.password)))
+					return done(null, null);
+				return done(null, user);
+			})
+			.catch((error) => done(error, null));
 	})
 );
 
@@ -24,11 +21,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-	const findUser = await User.findById(id);
-	if (!findUser) {
-		const error = { statusCode: 404, message: "User not found." };
-		done(error, false);
-		return;
-	}
-	done(null, findUser);
+	User.findById(id)
+		.then((user) => done(null, user))
+		.catch((error) => done(error, null));
 });

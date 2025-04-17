@@ -1,10 +1,10 @@
 import express from "express";
 import mongoose from "mongoose";
-import router from "./routes/index.mjs";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import passport from "passport";
+import router from "./routes/index.mjs";
 import "./strategies/local.mjs";
 
 await mongoose.connect(process.env.DATABASE_URI);

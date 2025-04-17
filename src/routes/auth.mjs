@@ -3,12 +3,14 @@ import { matchedData } from "express-validator";
 import APIResponse from "../schemas/api-response.mjs";
 import SchemaValidator from "../middlewares/schema-validator.mjs";
 import UserSignupSchemaValidation from "../schemas/user-signup.mjs";
+import TokenRefreshSchemaValidation from "../schemas/token-refresh.mjs";
 import User from "../models/user.mjs";
-import RevokedToken from "../models/revoked-token.mjs";
 import { hashPassword } from "../utils/password.mjs";
+import { createTokenPair, revokeToken } from "../utils/jwt.mjs";
 import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
 import JWTAuth from "../middlewares/jwt-auth.mjs";
 import { IsSignedIn, IsSignedOut } from "../middlewares/check-auth.mjs";
+import RefreshTokenValidator from "../middlewares/refresh-token-validator.mjs";
 
 const router = Router();
 
@@ -58,21 +60,38 @@ router.get("/signout", IsSignedIn, (request, response, next) => {
 router.post("/jwt/signin", JWTLocalAuth, (request, response) => {
 	return new APIResponse(200)
 		.setMessage("Signed in successfully.")
-		.setData(request.tokens)
+		.setData(request.user)
 		.send(response);
 });
 
-router.get("/jwt/signout", JWTAuth, (request, response, next) => {
+router.get("/jwt/signout", JWTAuth, async (request, response, next) => {
 	const { payload } = request;
 
-	const expiresAt = new Date(payload.exp * 1000);
-	RevokedToken.create({ jti: payload.jti, expiresAt: expiresAt })
-		.then((_) =>
-			new APIResponse(200)
-				.setMessage("Signed out successfully.")
-				.send(response)
-		)
-		.catch((error) => next(error));
+	const { error } = await revokeToken(payload);
+	if (error) return next(error);
+	return new APIResponse(200)
+		.setMessage("Signed out successfully.")
+		.send(response);
 });
+
+router.post(
+	"/jwt/refresh",
+	JWTAuth,
+	TokenRefreshSchemaValidation,
+	SchemaValidator,
+	RefreshTokenValidator,
+	(request, response, next) => {
+		const { user, payload: accessPayload } = request;
+
+		const { error } = revokeToken(accessPayload);
+		if (error) return next(error);
+
+		const tokenPair = createTokenPair(user);
+		return new APIResponse(200)
+			.setMessage("Refreshed tokens successfully.")
+			.setData(tokenPair)
+			.send(response);
+	}
+);
 
 export default router;

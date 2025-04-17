@@ -1,15 +1,16 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import settings from "../config/settings.mjs";
 import RevokedToken from "../models/revoked-token.mjs";
 
 export const createToken = (payload, type = "access") => {
 	payload.type = type;
 	const expiry =
 		type == "access"
-			? process.env.ACCESS_TOKEN_EXPIRY
-			: process.env.REFRESH_TOKEN_EXPIRY;
+			? settings.ACCESS_TOKEN_EXPIRY
+			: settings.REFRESH_TOKEN_EXPIRY;
 
-	return jwt.sign(payload, process.env.SECRET_KEY, {
+	return jwt.sign(payload, settings.SECRET_KEY, {
 		expiresIn: expiry,
 	});
 };
@@ -17,7 +18,7 @@ export const createToken = (payload, type = "access") => {
 export const decodeToken = (token) => {
 	const result = { error: null, data: null };
 	try {
-		result.data = jwt.verify(token, process.env.SECRET_KEY);
+		result.data = jwt.verify(token, settings.SECRET_KEY);
 	} catch (error) {
 		result.error = error;
 	}

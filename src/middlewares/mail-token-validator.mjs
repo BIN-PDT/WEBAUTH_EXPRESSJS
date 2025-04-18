@@ -1,8 +1,8 @@
 import { APIResponse } from "../schemas/api-response.mjs";
 import { User } from "../models/user.mjs";
-import { decodeToken } from "../utils/jwt.mjs";
+import { checkRevokedToken, decodeToken } from "../utils/jwt.mjs";
 
-export function MailTokenValidator(request, response, next) {
+export async function MailTokenValidator(request, response, next) {
 	const { params } = request;
 	const res = new APIResponse(200);
 
@@ -14,6 +14,14 @@ export function MailTokenValidator(request, response, next) {
 			.setMessage("Invalid credentials.")
 			.send(response);
 
+	const result = await checkRevokedToken(data.jti);
+	if (result.error) return next(error);
+	if (result.data)
+		return res
+			.setStatusCode(400)
+			.setMessage("Link has been used.")
+			.send(response);
+
 	User.findById(data.sub)
 		.then((user) => {
 			if (!user)
@@ -22,6 +30,7 @@ export function MailTokenValidator(request, response, next) {
 					.setMessage("User not found.")
 					.send(response);
 
+			request.payload = data;
 			request.user = user;
 			next();
 		})

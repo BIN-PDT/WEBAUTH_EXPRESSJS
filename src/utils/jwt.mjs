@@ -25,6 +25,16 @@ export function decodeToken(token) {
 	return result;
 }
 
+export async function checkRevokedToken(jti) {
+	const result = { error: null, data: null };
+	try {
+		result.data = await RevokedToken.findOne({ jti });
+	} catch (error) {
+		result.error = error;
+	}
+	return result;
+}
+
 export async function revokeToken(payload) {
 	const result = { error: null, data: null };
 	try {
@@ -47,6 +57,6 @@ export function createTokenPair(user) {
 }
 
 export function createMailToken(user, expiry) {
-	const payload = { sub: user.id, type: "mail" };
+	const payload = { sub: user.id, type: "mail", jti: uuidv4() };
 	return jwt.sign(payload, settings.SECRET_KEY, { expiresIn: expiry });
 }

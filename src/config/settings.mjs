@@ -10,6 +10,7 @@ class Settings {
 		.get("REFRESH_TOKEN_EXPIRY")
 		.required()
 		.asString();
+	VERIFY_EMAIL_EXPIRY = env.get("VERIFY_EMAIL_EXPIRY").required().asString();
 	GOOGLE_CLIENT_ID = env.get("GOOGLE_CLIENT_ID").required().asString();
 	GOOGLE_CLIENT_SECRET = env
 		.get("GOOGLE_CLIENT_SECRET")

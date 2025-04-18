@@ -45,3 +45,8 @@ export function createTokenPair(user) {
 		refreshToken: createToken(payload, "refresh"),
 	};
 }
+
+export function createMailToken(user, expiry) {
+	const payload = { sub: user.id, type: "mail" };
+	return jwt.sign(payload, settings.SECRET_KEY, { expiresIn: expiry });
+}

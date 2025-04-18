@@ -1,20 +1,28 @@
 import { Router } from "express";
 import { matchedData } from "express-validator";
+import { settings } from "../config/settings.mjs";
 import { APIResponse } from "../schemas/api-response.mjs";
 import { UserSignupSchemaValidation } from "../schemas/user-signup.mjs";
 import { TokenRefreshSchemaValidation } from "../schemas/token-refresh.mjs";
+import { MailTokenSchemaValidation } from "../schemas/mail-token.mjs";
 import { SchemaValidator } from "../middlewares/schema-validator.mjs";
 import { RefreshTokenValidator } from "../middlewares/refresh-token-validator.mjs";
 import {
 	SignedInValidator,
 	SignedOutValidator,
 } from "../middlewares/session-validator.mjs";
+import { MailTokenValidator } from "../middlewares/mail-token-validator.mjs";
 import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
 import { JWTAuth } from "../middlewares/jwt-auth.mjs";
 import { GoogleLocalAuth, GoogleAuth } from "../middlewares/google-auth.mjs";
 import { User } from "../models/user.mjs";
 import { hashPassword } from "../utils/password.mjs";
-import { createTokenPair, revokeToken } from "../utils/jwt.mjs";
+import {
+	createTokenPair,
+	createMailToken,
+	revokeToken,
+} from "../utils/jwt.mjs";
+import { sendSignupMessage } from "../mail/mailer.mjs";
 
 const router = Router();
 
@@ -23,6 +31,7 @@ router.post(
 	UserSignupSchemaValidation,
 	SchemaValidator,
 	async (request, response, next) => {
+		const { protocol, host } = request;
 		const cleanedData = matchedData(request);
 		const res = new APIResponse(201);
 
@@ -35,9 +44,44 @@ router.post(
 
 			cleanedData.password = await hashPassword(cleanedData.password);
 			const newUser = await User.create(cleanedData);
+
+			const token = createMailToken(
+				newUser,
+				settings.VERIFY_EMAIL_EXPIRY
+			);
+			const link = `${protocol}://${host}/auth/verify-email/${token}`;
+			await sendSignupMessage(newUser.email, link);
+
 			return res
 				.setMessage("Signed up successfully.")
 				.setData(newUser)
+				.send(response);
+		} catch (error) {
+			next(error);
+		}
+	}
+);
+
+router.get(
+	"/verify-email/:token",
+	MailTokenSchemaValidation,
+	SchemaValidator,
+	MailTokenValidator,
+	(request, response, next) => {
+		const { user } = request;
+		const res = new APIResponse(200);
+
+		if (user.isVerified)
+			return res
+				.setStatusCode(409)
+				.setMessage("Email is verified.")
+				.send(response);
+
+		user.isVerified = true;
+		try {
+			user.save();
+			return res
+				.setMessage("Verified email successfully.")
 				.send(response);
 		} catch (error) {
 			next(error);

@@ -1,13 +1,13 @@
 import passport from "passport";
-import APIResponse from "../schemas/api-response.mjs";
+import { APIResponse } from "../schemas/api-response.mjs";
 
-export const GoogleLocalAuth = (request, response, next) => {
+export function GoogleLocalAuth(request, response, next) {
 	passport.authenticate("google", {
 		scope: ["email", "profile"],
 	})(request, response, next);
-};
+}
 
-export const GoogleAuth = (request, response, next) => {
+export function GoogleAuth(request, response, next) {
 	passport.authenticate("google", (error, user) => {
 		if (error) return next(error);
 		if (!user)
@@ -17,4 +17,4 @@ export const GoogleAuth = (request, response, next) => {
 
 		request.logIn(user, (error) => next(error));
 	})(request, response, next);
-};
+}

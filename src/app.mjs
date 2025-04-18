@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import passport from "passport";
-import settings from "./config/settings.mjs";
+import { settings } from "./config/settings.mjs";
 import router from "./routes/index.mjs";
 import "./strategies/local.mjs";
 import "./strategies/jwt.mjs";

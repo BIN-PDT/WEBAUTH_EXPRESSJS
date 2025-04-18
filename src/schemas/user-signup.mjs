@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export default [
+export const UserSignupSchemaValidation = [
 	body("username")
 		.isString()
 		.withMessage("Username must be a string.")

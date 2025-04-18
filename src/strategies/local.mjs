@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-import User from "../models/user.mjs";
-import SocialUser from "../models/social-user.mjs";
+import { User } from "../models/user.mjs";
+import { SocialUser } from "../models/social-user.mjs";
 import { comparePassword } from "../utils/password.mjs";
 
 passport.use(

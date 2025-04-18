@@ -21,4 +21,4 @@ class Settings {
 		.asUrlString();
 }
 
-export default new Settings();
+export const settings = new Settings();

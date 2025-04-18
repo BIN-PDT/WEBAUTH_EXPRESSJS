@@ -1,17 +1,17 @@
 import { Router } from "express";
 import { matchedData } from "express-validator";
-import APIResponse from "../schemas/api-response.mjs";
-import SchemaValidator from "../middlewares/schema-validator.mjs";
-import UserSignupSchemaValidation from "../schemas/user-signup.mjs";
-import TokenRefreshSchemaValidation from "../schemas/token-refresh.mjs";
-import User from "../models/user.mjs";
+import { APIResponse } from "../schemas/api-response.mjs";
+import { UserSignupSchemaValidation } from "../schemas/user-signup.mjs";
+import { TokenRefreshSchemaValidation } from "../schemas/token-refresh.mjs";
+import { SchemaValidator } from "../middlewares/schema-validator.mjs";
+import { RefreshTokenValidator } from "../middlewares/refresh-token-validator.mjs";
+import { IsSignedIn, IsSignedOut } from "../middlewares/session-validator.mjs";
+import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
+import { JWTAuth } from "../middlewares/jwt-auth.mjs";
+import { GoogleLocalAuth, GoogleAuth } from "../middlewares/google-auth.mjs";
+import { User } from "../models/user.mjs";
 import { hashPassword } from "../utils/password.mjs";
 import { createTokenPair, revokeToken } from "../utils/jwt.mjs";
-import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
-import JWTAuth from "../middlewares/jwt-auth.mjs";
-import { GoogleLocalAuth, GoogleAuth } from "../middlewares/google-auth.mjs";
-import { IsSignedIn, IsSignedOut } from "../middlewares/session-validator.mjs";
-import RefreshTokenValidator from "../middlewares/refresh-token-validator.mjs";
 
 const router = Router();
 

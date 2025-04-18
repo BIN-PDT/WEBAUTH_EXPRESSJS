@@ -1,7 +1,7 @@
-import APIResponse from "../schemas/api-response.mjs";
+import { APIResponse } from "../schemas/api-response.mjs";
 import { decodeToken } from "../utils/jwt.mjs";
 
-export default function (request, response, next) {
+export function RefreshTokenValidator(request, response, next) {
 	const {
 		body: { refreshToken },
 		payload: accessPayload,

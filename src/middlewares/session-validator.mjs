@@ -1,4 +1,4 @@
-import APIResponse from "../schemas/api-response.mjs";
+import { APIResponse } from "../schemas/api-response.mjs";
 
 export function IsSignedOut(request, response, next) {
 	if (request.isAuthenticated()) {

@@ -34,4 +34,4 @@ const SocialUserSchema = new mongoose.Schema(
 	}
 );
 
-export default mongoose.model("SocialUser", SocialUserSchema);
+export const SocialUser = mongoose.model("SocialUser", SocialUserSchema);

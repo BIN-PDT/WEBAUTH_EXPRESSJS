@@ -18,4 +18,4 @@ const RevokedTokenSchema = new mongoose.Schema({
 	},
 });
 
-export default mongoose.model("RevokedToken", RevokedTokenSchema);
+export const RevokedToken = mongoose.model("RevokedToken", RevokedTokenSchema);

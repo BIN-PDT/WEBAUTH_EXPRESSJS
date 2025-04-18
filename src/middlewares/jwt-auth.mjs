@@ -1,7 +1,7 @@
 import passport from "passport";
-import APIResponse from "../schemas/api-response.mjs";
+import { APIResponse } from "../schemas/api-response.mjs";
 
-export default function (request, response, next) {
+export function JWTAuth(request, response, next) {
 	passport.authenticate(
 		"jwt",
 		{ session: false },

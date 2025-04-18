@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy } from "passport-google-oauth20";
-import settings from "../config/settings.mjs";
-import SocialUser from "../models/social-user.mjs";
+import { settings } from "../config/settings.mjs";
+import { SocialUser } from "../models/social-user.mjs";
 
 passport.use(
 	new Strategy(

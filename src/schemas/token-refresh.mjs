@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export default [
+export const TokenRefreshSchemaValidation = [
 	body("refreshToken")
 		.isString()
 		.withMessage("Token must be a string.")

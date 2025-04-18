@@ -8,6 +8,7 @@ import settings from "./config/settings.mjs";
 import router from "./routes/index.mjs";
 import "./strategies/local.mjs";
 import "./strategies/jwt.mjs";
+import "./strategies/google.mjs";
 
 await mongoose.connect(settings.DATABASE_URI);
 

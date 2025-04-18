@@ -10,6 +10,15 @@ class Settings {
 		.get("REFRESH_TOKEN_EXPIRY")
 		.required()
 		.asString();
+	GOOGLE_CLIENT_ID = env.get("GOOGLE_CLIENT_ID").required().asString();
+	GOOGLE_CLIENT_SECRET = env
+		.get("GOOGLE_CLIENT_SECRET")
+		.required()
+		.asString();
+	GOOGLE_CALLBACK_URI = env
+		.get("GOOGLE_CALLBACK_URI")
+		.required()
+		.asUrlString();
 }
 
 export default new Settings();

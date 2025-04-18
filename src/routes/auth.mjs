@@ -9,6 +9,7 @@ import { hashPassword } from "../utils/password.mjs";
 import { createTokenPair, revokeToken } from "../utils/jwt.mjs";
 import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
 import JWTAuth from "../middlewares/jwt-auth.mjs";
+import { GoogleLocalAuth, GoogleAuth } from "../middlewares/google-auth.mjs";
 import { IsSignedIn, IsSignedOut } from "../middlewares/session-validator.mjs";
 import RefreshTokenValidator from "../middlewares/refresh-token-validator.mjs";
 
@@ -93,5 +94,23 @@ router.post(
 			.send(response);
 	}
 );
+
+router.get("/google/signin", IsSignedOut, GoogleLocalAuth);
+
+router.get("/google/callback", IsSignedOut, GoogleAuth, (request, response) => {
+	return new APIResponse(200)
+		.setMessage("Signed in successfully.")
+		.setData(request.user)
+		.send(response);
+});
+
+router.get("/google/signout", IsSignedIn, (request, response, next) => {
+	request.logOut((error) => {
+		if (error) return next(error);
+		return new APIResponse(200)
+			.setMessage("Signed out successfully.")
+			.send(response);
+	});
+});
 
 export default router;

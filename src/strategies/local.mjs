@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
 import User from "../models/user.mjs";
+import SocialUser from "../models/social-user.mjs";
 import { comparePassword } from "../utils/password.mjs";
 
 passport.use(
@@ -17,11 +18,16 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-	done(null, user.id);
+	const userClaims = { provider: user?.provider, id: user.id };
+	done(null, userClaims);
 });
 
-passport.deserializeUser(async (id, done) => {
-	User.findById(id)
-		.then((user) => done(null, user))
-		.catch((error) => done(error, null));
+passport.deserializeUser(async ({ provider, id }, done) => {
+	try {
+		const UserModel = provider ? SocialUser : User;
+		const user = UserModel.findById(id);
+		return done(null, user);
+	} catch (error) {
+		return done(error, null);
+	}
 });

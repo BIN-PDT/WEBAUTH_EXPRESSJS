@@ -19,6 +19,11 @@ class Settings {
 		.get("GOOGLE_CALLBACK_URI")
 		.required()
 		.asUrlString();
+	MAIL_USERNAME = env.get("MAIL_USERNAME").required().asEmailString();
+	MAIL_PASSWORD = env.get("MAIL_PASSWORD").required().asString();
+	MAIL_HOST = "smtp.gmail.com";
+	MAIL_PORT = 465;
+	MAIL_FROM = '"ExpressJS" <no-reply@localhost.com>';
 }
 
 export const settings = new Settings();

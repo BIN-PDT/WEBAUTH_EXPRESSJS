@@ -19,6 +19,18 @@ const UserSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.Boolean,
 			default: true,
 		},
+
+		email: {
+			type: mongoose.Schema.Types.String,
+			required: true,
+			unique: true,
+			maxlength: 150,
+		},
+
+		isVerified: {
+			type: mongoose.Schema.Types.Boolean,
+			default: false,
+		},
 	},
 	{
 		toJSON: {

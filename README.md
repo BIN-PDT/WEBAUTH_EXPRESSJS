@@ -16,6 +16,8 @@ _For privacy reasons, follow the format of `.env.example` and replace the sensit
 
 -   _Register OAuth Application of Social Provider to obtain `CLIENT_ID`, `CLIENT_SECRET` & `CALLBACK_URI`_.
 
+-   _Replace `MAIL_USERNAME` & `MAIL_PASSWORD` (Application Password) with your Gmail Account_.
+
 **2. DEPENDENCY**
 
 ```

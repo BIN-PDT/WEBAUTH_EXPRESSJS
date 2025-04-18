@@ -5,6 +5,6 @@ export async function hashPassword(plain) {
 	return await bcrypt.hash(plain, salt);
 }
 
-export async function comparePassword(plain, hash) {
-	return await bcrypt.compare(plain, hash);
+export function comparePassword(plain, hash) {
+	return bcrypt.compare(plain, hash);
 }

@@ -1,37 +1,29 @@
 import { Router } from "express";
 import { matchedData } from "express-validator";
-import { settings } from "../config/settings.mjs";
-import { APIResponse } from "../schemas/api-response.mjs";
-import { UserSignupSchemaValidation } from "../schemas/user-signup.mjs";
-import { TokenRefreshSchemaValidation } from "../schemas/token-refresh.mjs";
-import { MailTokenSchemaValidation } from "../schemas/mail-token.mjs";
+import { settings } from "../../config/settings.mjs";
+import { APIResponse } from "../../schemas/api-response.mjs";
+import { User } from "../../models/user.mjs";
+import { SessionLocalAuth } from "../../middlewares/local-auth.mjs";
+import { UserSignupSchemaValidation } from "../../schemas/user-signup.mjs";
+import { MailTokenSchemaValidation } from "../../schemas/mail-token.mjs";
 import {
 	PasswordResetRequestSchemaValidation,
 	PasswordResetConfirmSchemaValidation,
-} from "../schemas/password-reset.mjs";
-import { SchemaValidator } from "../middlewares/schema-validator.mjs";
-import { RefreshTokenValidator } from "../middlewares/refresh-token-validator.mjs";
+} from "../../schemas/password-reset.mjs";
 import {
 	SignedInValidator,
 	SignedOutValidator,
-} from "../middlewares/session-validator.mjs";
-import { MailTokenValidator } from "../middlewares/mail-token-validator.mjs";
-import { SessionLocalAuth, JWTLocalAuth } from "../middlewares/local-auth.mjs";
-import { JWTAuth } from "../middlewares/jwt-auth.mjs";
-import { GoogleLocalAuth, GoogleAuth } from "../middlewares/google-auth.mjs";
-import { User } from "../models/user.mjs";
-import { hashPassword } from "../utils/password.mjs";
-import {
-	createTokenPair,
-	createMailToken,
-	revokeToken,
-} from "../utils/jwt.mjs";
+} from "../../middlewares/session-validator.mjs";
+import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
+import { MailTokenValidator } from "../../middlewares/mail-token-validator.mjs";
+import { hashPassword } from "../../utils/password.mjs";
+import { createMailToken, revokeToken } from "../../utils/jwt.mjs";
 import {
 	sendSignupMessage,
 	sendResetPasswordMessage,
-} from "../mail/mailer.mjs";
+} from "../../mail/mailer.mjs";
 
-const router = Router();
+export const router = Router();
 
 router.post(
 	"/signup",
@@ -87,6 +79,7 @@ router.get(
 		user.isVerified = true;
 		try {
 			user.save();
+
 			return res
 				.setMessage("Verified email successfully.")
 				.send(response);
@@ -111,6 +104,7 @@ router.post(
 router.get("/signout", SignedInValidator, (request, response, next) => {
 	request.logOut((error) => {
 		if (error) return next(error);
+
 		return new APIResponse(200)
 			.setMessage("Signed out successfully.")
 			.send(response);
@@ -167,65 +161,3 @@ router.post(
 		}
 	}
 );
-
-router.post("/jwt/signin", JWTLocalAuth, (request, response) => {
-	return new APIResponse(200)
-		.setMessage("Signed in successfully.")
-		.setData(request.user)
-		.send(response);
-});
-
-router.get("/jwt/signout", JWTAuth, async (request, response, next) => {
-	const { payload } = request;
-
-	const { error } = await revokeToken(payload);
-	if (error) return next(error);
-	return new APIResponse(200)
-		.setMessage("Signed out successfully.")
-		.send(response);
-});
-
-router.post(
-	"/jwt/refresh",
-	JWTAuth,
-	TokenRefreshSchemaValidation,
-	SchemaValidator,
-	RefreshTokenValidator,
-	(request, response, next) => {
-		const { user, payload: accessPayload } = request;
-
-		const { error } = revokeToken(accessPayload);
-		if (error) return next(error);
-
-		const tokenPair = createTokenPair(user);
-		return new APIResponse(200)
-			.setMessage("Refreshed tokens successfully.")
-			.setData(tokenPair)
-			.send(response);
-	}
-);
-
-router.get("/google/signin", SignedOutValidator, GoogleLocalAuth);
-
-router.get(
-	"/google/callback",
-	SignedOutValidator,
-	GoogleAuth,
-	(request, response) => {
-		return new APIResponse(200)
-			.setMessage("Signed in successfully.")
-			.setData(request.user)
-			.send(response);
-	}
-);
-
-router.get("/google/signout", SignedInValidator, (request, response, next) => {
-	request.logOut((error) => {
-		if (error) return next(error);
-		return new APIResponse(200)
-			.setMessage("Signed out successfully.")
-			.send(response);
-	});
-});
-
-export default router;

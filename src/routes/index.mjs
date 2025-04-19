@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { ErrorHandler } from "../middlewares/error-handler.mjs";
-import authRouter from "./auth.mjs";
+import { router as authRouter } from "./auth/index.mjs";
 
 const router = Router();
 

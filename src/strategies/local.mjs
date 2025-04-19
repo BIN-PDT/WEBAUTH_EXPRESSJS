@@ -25,7 +25,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async ({ provider, id }, done) => {
 	try {
 		const UserModel = provider ? SocialUser : User;
-		const user = UserModel.findById(id);
+		const user = await UserModel.findById(id);
 		return done(null, user);
 	} catch (error) {
 		return done(error, null);

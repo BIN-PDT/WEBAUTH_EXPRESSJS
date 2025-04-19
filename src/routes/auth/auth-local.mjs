@@ -161,3 +161,32 @@ router.post(
 		}
 	}
 );
+
+router.get(
+	"/delete-account",
+	SignedInValidator,
+	async (request, response, next) => {
+		const { user } = request;
+		const res = new APIResponse(200);
+
+		try {
+			const { deletedCount } = await User.deleteOne({ _id: user.id });
+			if (deletedCount == 0)
+				return res
+					.setStatusCode(404)
+					.setMessage("User not found.")
+					.send(response);
+		} catch (error) {
+			next(error);
+		}
+
+		request.logOut((error) => {
+			if (error) return next(error);
+
+			return res
+				.setMessage("Deleted account successfully.")
+				.setData(user)
+				.send(response);
+		});
+	}
+);

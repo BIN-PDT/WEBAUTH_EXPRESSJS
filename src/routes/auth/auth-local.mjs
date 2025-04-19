@@ -10,13 +10,14 @@ import {
 	PasswordResetRequestSchemaValidation,
 	PasswordResetConfirmSchemaValidation,
 } from "../../schemas/password-reset.mjs";
+import { PasswordChangeSchemaValidation } from "../../schemas/password-change.mjs";
 import {
 	SignedInValidator,
 	SignedOutValidator,
 } from "../../middlewares/session-validator.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
 import { MailTokenValidator } from "../../middlewares/mail-token-validator.mjs";
-import { hashPassword } from "../../utils/password.mjs";
+import { comparePassword, hashPassword } from "../../utils/password.mjs";
 import { createMailToken, revokeToken } from "../../utils/jwt.mjs";
 import {
 	sendSignupMessage,
@@ -155,6 +156,34 @@ router.post(
 
 			return new APIResponse(200)
 				.setMessage("Confirmed password reset successfully.")
+				.send(response);
+		} catch (error) {
+			next(error);
+		}
+	}
+);
+
+router.post(
+	"/change-password",
+	SignedInValidator,
+	PasswordChangeSchemaValidation,
+	SchemaValidator,
+	async (request, response, next) => {
+		const { body, user } = request;
+		const res = new APIResponse(200);
+
+		if (!(await comparePassword(body.oldPassword, user.password)))
+			return res
+				.setStatusCode(400)
+				.setMessage("Wrong current password.")
+				.send(response);
+
+		user.password = await hashPassword(body.password);
+		try {
+			user.save();
+
+			return res
+				.setMessage("Changed password successfully.")
 				.send(response);
 		} catch (error) {
 			next(error);

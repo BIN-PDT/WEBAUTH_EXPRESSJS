@@ -36,3 +36,24 @@ export async function MailTokenValidator(request, response, next) {
 		})
 		.catch((error) => next(error));
 }
+
+export function RefreshTokenValidator(request, response, next) {
+	const {
+		body: { refreshToken },
+		payload: accessPayload,
+	} = request;
+
+	const { error, data: refreshPayload } = decodeToken(refreshToken);
+	if (error) return next(error);
+
+	if (
+		refreshPayload.type != "refresh" ||
+		refreshPayload.jti != accessPayload.jti ||
+		refreshPayload.sub != accessPayload.sub
+	)
+		return new APIResponse(400)
+			.setMessage("Invalid credentials.")
+			.send(response);
+
+	next();
+}

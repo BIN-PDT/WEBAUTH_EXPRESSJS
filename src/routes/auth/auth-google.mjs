@@ -7,8 +7,8 @@ import {
 import {
 	GoogleAuthorize,
 	GoogleLocalAuth,
-} from "../../middlewares/google-auth.mjs";
-import { GoogleUserValidator } from "../../middlewares/social-user-validator.mjs";
+} from "../../middlewares/auth/google-auth.mjs";
+import { GoogleUserValidator } from "../../middlewares/user-validator.mjs";
 
 export const router = Router();
 

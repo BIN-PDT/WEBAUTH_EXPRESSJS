@@ -1,5 +1,5 @@
 import passport from "passport";
-import { APIResponse } from "../schemas/api-response.mjs";
+import { APIResponse } from "../../schemas/api-response.mjs";
 
 export function SessionLocalAuth(request, response, next) {
 	passport.authenticate("local", (error, user) => {

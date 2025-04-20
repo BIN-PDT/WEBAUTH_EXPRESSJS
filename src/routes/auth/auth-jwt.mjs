@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { APIResponse } from "../../schemas/api-response.mjs";
-import { JWTAuth, JWTLocalAuth } from "../../middlewares/jwt-auth.mjs";
+import { JWTAuth, JWTLocalAuth } from "../../middlewares/auth/jwt-auth.mjs";
 import { TokenRefreshSchema } from "../../schemas/token-refresh.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
-import { RefreshTokenValidator } from "../../middlewares/refresh-token-validator.mjs";
+import { RefreshTokenValidator } from "../../middlewares/token-validator.mjs";
 import { createTokenPair, revokeToken } from "../../utils/jwt.mjs";
 
 export const router = Router();

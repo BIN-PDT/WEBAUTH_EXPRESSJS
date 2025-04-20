@@ -3,7 +3,7 @@ import { matchedData } from "express-validator";
 import { settings } from "../../config/settings.mjs";
 import { APIResponse } from "../../schemas/api-response.mjs";
 import { User } from "../../models/user.mjs";
-import { SessionLocalAuth } from "../../middlewares/session-auth.mjs";
+import { SessionLocalAuth } from "../../middlewares/auth/session-auth.mjs";
 import { UserSignupSchema } from "../../schemas/user-signup.mjs";
 import { MailTokenSchema } from "../../schemas/mail-token.mjs";
 import {
@@ -16,9 +16,9 @@ import {
 	SignedInValidator,
 	SignedOutValidator,
 } from "../../middlewares/session-validator.mjs";
-import { LocalUserValidator } from "../../middlewares/local-user-validator.mjs";
+import { LocalUserValidator } from "../../middlewares/user-validator.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
-import { MailTokenValidator } from "../../middlewares/mail-token-validator.mjs";
+import { MailTokenValidator } from "../../middlewares/token-validator.mjs";
 import { comparePassword, hashPassword } from "../../utils/password.mjs";
 import { createMailToken, revokeToken } from "../../utils/jwt.mjs";
 import { sendResetPasswordMessage } from "../../mail/main.mjs";

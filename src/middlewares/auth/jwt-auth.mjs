@@ -1,6 +1,6 @@
 import passport from "passport";
-import { APIResponse } from "../schemas/api-response.mjs";
-import { createTokenPair } from "../utils/jwt.mjs";
+import { APIResponse } from "../../schemas/api-response.mjs";
+import { createTokenPair } from "../../utils/jwt.mjs";
 
 export function JWTLocalAuth(request, response, next) {
 	passport.authenticate("local", (error, user) => {

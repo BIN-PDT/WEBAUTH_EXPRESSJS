@@ -1,6 +1,6 @@
 import { APIResponse } from "../schemas/api-response.mjs";
 import { User } from "../models/user.mjs";
-import { checkRevokedToken, decodeToken } from "../utils/jwt.mjs";
+import { checkRevokedToken, decodeToken } from "../utils/token.mjs";
 
 export async function MailTokenValidator(request, response, next) {
 	const { params } = request;

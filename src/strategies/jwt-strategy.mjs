@@ -2,7 +2,7 @@ import passport from "passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { settings } from "../config/settings.mjs";
 import { User } from "../models/user.mjs";
-import { checkRevokedToken } from "../utils/jwt.mjs";
+import { checkRevokedToken } from "../utils/token.mjs";
 
 passport.use(
 	"jwt",

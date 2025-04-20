@@ -4,7 +4,7 @@ import { JWTAuth, JWTLocalAuth } from "../../middlewares/auth/jwt-auth.mjs";
 import { TokenRefreshSchema } from "../../schemas/token-refresh.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
 import { RefreshTokenValidator } from "../../middlewares/token-validator.mjs";
-import { createTokenPair, revokeToken } from "../../utils/jwt.mjs";
+import { createAuthToken, revokeToken } from "../../utils/token.mjs";
 
 export const router = Router();
 
@@ -38,7 +38,7 @@ router.post(
 		const { error } = revokeToken(accessPayload);
 		if (error) return next(error);
 
-		const tokenPair = createTokenPair(user);
+		const tokenPair = createAuthToken(user);
 		return new APIResponse(200)
 			.setMessage("Refreshed tokens successfully.")
 			.setData(tokenPair)

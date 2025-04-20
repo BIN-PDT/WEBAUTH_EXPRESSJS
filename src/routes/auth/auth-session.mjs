@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { matchedData } from "express-validator";
-import { settings } from "../../config/settings.mjs";
 import { APIResponse } from "../../schemas/api-response.mjs";
 import { User } from "../../models/user.mjs";
 import { SessionLocalAuth } from "../../middlewares/auth/session-auth.mjs";
@@ -20,9 +19,8 @@ import { LocalUserValidator } from "../../middlewares/user-validator.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
 import { MailTokenValidator } from "../../middlewares/token-validator.mjs";
 import { comparePassword, hashPassword } from "../../utils/password.mjs";
-import { createMailToken, revokeToken } from "../../utils/jwt.mjs";
-import { sendResetPasswordMessage } from "../../mail/main.mjs";
-import { sendEmailVerification } from "../../utils/mail.mjs";
+import { revokeToken } from "../../utils/token.mjs";
+import { mailResetPassword, mailVerifyEmail } from "../../utils/mail.mjs";
 
 export const router = Router();
 
@@ -48,7 +46,7 @@ router.post(
 
 			cleanedData.password = await hashPassword(cleanedData.password);
 			const newUser = await User.create(cleanedData);
-			await sendEmailVerification(request, newUser);
+			await mailVerifyEmail(request, newUser);
 
 			return res
 				.setMessage("Signed up successfully.")
@@ -92,18 +90,11 @@ router.post(
 	PasswordResetRequestSchema,
 	SchemaValidator,
 	async (request, response, next) => {
-		const { protocol, host, body } = request;
+		const { body } = request;
 
 		try {
 			const user = await User.findOne({ email: body.email });
-			if (user) {
-				const token = createMailToken(
-					user,
-					settings.RESET_PASSWORD_EXPIRY
-				);
-				const link = `${protocol}://${host}/auth/confirm-reset-password/${token}`;
-				await sendResetPasswordMessage(user.email, link);
-			}
+			if (user) await mailResetPassword(request, user);
 
 			return new APIResponse(200)
 				.setMessage("Requested password reset successfully.")
@@ -180,7 +171,7 @@ router.get(
 				.setMessage("Email is verified.")
 				.send(response);
 
-		await sendEmailVerification(request, user);
+		await mailVerifyEmail(request, user);
 
 		return res
 			.setMessage("Sended verification email successfully.")

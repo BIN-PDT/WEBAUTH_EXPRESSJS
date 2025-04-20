@@ -1,4 +1,4 @@
-export function getSignupHTML(link) {
+export function getVerifyEmailTemplate(link) {
 	return (
 		'<div style="font-style: italic;">\n' +
 		"<p>Welcome! We are sending this email to notify you about an important event.</p>\n" +
@@ -8,7 +8,7 @@ export function getSignupHTML(link) {
 	);
 }
 
-export function getResetPasswordHTML(link) {
+export function getResetPasswordTemplate(link) {
 	return (
 		'<div style="font-style: italic;">\n' +
 		"<p>Welcome! We are sending this email to notify you about an important event.</p>\n" +

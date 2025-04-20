@@ -4,19 +4,27 @@ import {
 	SignedInValidator,
 	SignedOutValidator,
 } from "../../middlewares/session-validator.mjs";
-import { GoogleAuth, GoogleLocalAuth } from "../../middlewares/google-auth.mjs";
+import {
+	GoogleAuthorize,
+	GoogleLocalAuth,
+} from "../../middlewares/google-auth.mjs";
 import { GoogleUserValidator } from "../../middlewares/social-user-validator.mjs";
 
 export const router = Router();
 
-router.get("/signin", SignedOutValidator, GoogleLocalAuth);
+router.get("/signin", SignedOutValidator, GoogleAuthorize);
 
-router.get("/callback", SignedOutValidator, GoogleAuth, (request, response) => {
-	return new APIResponse(200)
-		.setMessage("Signed in successfully.")
-		.setData(request.user)
-		.send(response);
-});
+router.get(
+	"/callback",
+	SignedOutValidator,
+	GoogleLocalAuth,
+	(request, response) => {
+		return new APIResponse(200)
+			.setMessage("Signed in successfully.")
+			.setData(request.user)
+			.send(response);
+	}
+);
 
 router.get(
 	"/signout",

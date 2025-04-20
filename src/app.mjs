@@ -6,9 +6,9 @@ import MongoStore from "connect-mongo";
 import passport from "passport";
 import { settings } from "./config/settings.mjs";
 import router from "./routes/index.mjs";
-import "./strategies/local.mjs";
-import "./strategies/jwt.mjs";
-import "./strategies/google.mjs";
+import "./strategies/local-strategy.mjs";
+import "./strategies/jwt-strategy.mjs";
+import "./strategies/google-strategy.mjs";
 
 await mongoose.connect(settings.DATABASE_URI);
 

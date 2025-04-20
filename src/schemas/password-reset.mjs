@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export const PasswordResetRequestSchemaValidation = [
+export const PasswordResetRequestSchema = [
 	body("email")
 		.isString()
 		.withMessage("Email must be a string.")
@@ -11,7 +11,7 @@ export const PasswordResetRequestSchemaValidation = [
 		.withMessage("Email must be a valid email address."),
 ];
 
-export const PasswordResetConfirmSchemaValidation = [
+export const PasswordResetConfirmSchema = [
 	body("password")
 		.isString()
 		.withMessage("Password must be a string.")

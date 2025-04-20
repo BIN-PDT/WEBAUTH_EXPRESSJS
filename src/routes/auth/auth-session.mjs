@@ -3,15 +3,15 @@ import { matchedData } from "express-validator";
 import { settings } from "../../config/settings.mjs";
 import { APIResponse } from "../../schemas/api-response.mjs";
 import { User } from "../../models/user.mjs";
-import { SessionLocalAuth } from "../../middlewares/local-auth.mjs";
-import { UserSignupSchemaValidation } from "../../schemas/user-signup.mjs";
-import { MailTokenSchemaValidation } from "../../schemas/mail-token.mjs";
+import { SessionLocalAuth } from "../../middlewares/session-auth.mjs";
+import { UserSignupSchema } from "../../schemas/user-signup.mjs";
+import { MailTokenSchema } from "../../schemas/mail-token.mjs";
 import {
-	PasswordResetRequestSchemaValidation,
-	PasswordResetConfirmSchemaValidation,
+	PasswordResetRequestSchema,
+	PasswordResetConfirmSchema,
 } from "../../schemas/password-reset.mjs";
-import { PasswordChangeSchemaValidation } from "../../schemas/password-change.mjs";
-import { EmailChangeSchemaValidation } from "../../schemas/email-change.mjs";
+import { PasswordChangeSchema } from "../../schemas/password-change.mjs";
+import { EmailChangeSchema } from "../../schemas/email-change.mjs";
 import {
 	SignedInValidator,
 	SignedOutValidator,
@@ -21,14 +21,14 @@ import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
 import { MailTokenValidator } from "../../middlewares/mail-token-validator.mjs";
 import { comparePassword, hashPassword } from "../../utils/password.mjs";
 import { createMailToken, revokeToken } from "../../utils/jwt.mjs";
-import { sendResetPasswordMessage } from "../../mail/mailer.mjs";
+import { sendResetPasswordMessage } from "../../mail/main.mjs";
 import { sendEmailVerification } from "../../utils/mail.mjs";
 
 export const router = Router();
 
 router.post(
 	"/signup",
-	UserSignupSchemaValidation,
+	UserSignupSchema,
 	SchemaValidator,
 	async (request, response, next) => {
 		const cleanedData = matchedData(request);
@@ -53,34 +53,6 @@ router.post(
 			return res
 				.setMessage("Signed up successfully.")
 				.setData(newUser)
-				.send(response);
-		} catch (error) {
-			next(error);
-		}
-	}
-);
-
-router.get(
-	"/verify-email/:token",
-	MailTokenSchemaValidation,
-	SchemaValidator,
-	MailTokenValidator,
-	(request, response, next) => {
-		const { user } = request;
-		const res = new APIResponse(200);
-
-		if (user.isVerified)
-			return res
-				.setStatusCode(409)
-				.setMessage("Email is verified.")
-				.send(response);
-
-		user.isVerified = true;
-		try {
-			user.save();
-
-			return res
-				.setMessage("Verified email successfully.")
 				.send(response);
 		} catch (error) {
 			next(error);
@@ -116,8 +88,8 @@ router.get(
 );
 
 router.post(
-	"/request-reset-password",
-	PasswordResetRequestSchemaValidation,
+	"/reset-password",
+	PasswordResetRequestSchema,
 	SchemaValidator,
 	async (request, response, next) => {
 		const { protocol, host, body } = request;
@@ -142,9 +114,9 @@ router.post(
 	}
 );
 
-router.post(
-	"/confirm-reset-password/:token",
-	PasswordResetConfirmSchemaValidation,
+router.patch(
+	"/reset-password/:token",
+	PasswordResetConfirmSchema,
 	SchemaValidator,
 	MailTokenValidator,
 	async (request, response, next) => {
@@ -166,11 +138,61 @@ router.post(
 	}
 );
 
-router.post(
+router.patch(
+	"/verify-email/:token",
+	MailTokenSchema,
+	SchemaValidator,
+	MailTokenValidator,
+	(request, response, next) => {
+		const { user } = request;
+		const res = new APIResponse(200);
+
+		if (user.isVerified)
+			return res
+				.setStatusCode(409)
+				.setMessage("Email is verified.")
+				.send(response);
+
+		user.isVerified = true;
+		try {
+			user.save();
+
+			return res
+				.setMessage("Verified email successfully.")
+				.send(response);
+		} catch (error) {
+			next(error);
+		}
+	}
+);
+
+router.get(
+	"/verify-email/send",
+	SignedInValidator,
+	LocalUserValidator,
+	async (request, response) => {
+		const { user } = request;
+		const res = new APIResponse(200);
+
+		if (user.isVerified)
+			return res
+				.setStatusCode(409)
+				.setMessage("Email is verified.")
+				.send(response);
+
+		await sendEmailVerification(request, user);
+
+		return res
+			.setMessage("Sended verification email successfully.")
+			.send(response);
+	}
+);
+
+router.patch(
 	"/change-password",
 	SignedInValidator,
 	LocalUserValidator,
-	PasswordChangeSchemaValidation,
+	PasswordChangeSchema,
 	SchemaValidator,
 	async (request, response, next) => {
 		const { body, user } = request;
@@ -195,11 +217,11 @@ router.post(
 	}
 );
 
-router.post(
+router.patch(
 	"/change-email",
 	SignedInValidator,
 	LocalUserValidator,
-	EmailChangeSchemaValidation,
+	EmailChangeSchema,
 	SchemaValidator,
 	async (request, response, next) => {
 		const { body, user } = request;
@@ -223,29 +245,7 @@ router.post(
 	}
 );
 
-router.get(
-	"/send-verification-email",
-	SignedInValidator,
-	LocalUserValidator,
-	async (request, response) => {
-		const { user } = request;
-		const res = new APIResponse(200);
-
-		if (user.isVerified)
-			return res
-				.setStatusCode(409)
-				.setMessage("Email is verified.")
-				.send(response);
-
-		await sendEmailVerification(request, user);
-
-		return res
-			.setMessage("Sended verification email successfully.")
-			.send(response);
-	}
-);
-
-router.get(
+router.delete(
 	"/delete-account",
 	SignedInValidator,
 	async (request, response, next) => {

@@ -1,5 +1,5 @@
 import { settings } from "../config/settings.mjs";
-import { sendSignupMessage } from "../mail/mailer.mjs";
+import { sendSignupMessage } from "../mail/main.mjs";
 import { createMailToken } from "./jwt.mjs";
 
 export async function sendEmailVerification(request, user) {

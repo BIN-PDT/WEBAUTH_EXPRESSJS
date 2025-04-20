@@ -1,6 +1,6 @@
 import { param } from "express-validator";
 
-export const MailTokenSchemaValidation = [
+export const MailTokenSchema = [
 	param("token")
 		.isString()
 		.withMessage("Token must be a string.")

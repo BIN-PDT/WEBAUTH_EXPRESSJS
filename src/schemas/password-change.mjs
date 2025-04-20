@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export const PasswordChangeSchemaValidation = [
+export const PasswordChangeSchema = [
 	body("oldPassword")
 		.isString()
 		.withMessage("Password must be a string.")

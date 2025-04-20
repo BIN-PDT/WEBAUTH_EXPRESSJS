@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export const EmailChangeSchemaValidation = [
+export const EmailChangeSchema = [
 	body("email")
 		.isString()
 		.withMessage("Email must be a string.")

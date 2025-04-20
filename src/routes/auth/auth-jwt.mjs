@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { APIResponse } from "../../schemas/api-response.mjs";
-import { JWTLocalAuth } from "../../middlewares/local-auth.mjs";
-import { JWTAuth } from "../../middlewares/jwt-auth.mjs";
-import { TokenRefreshSchemaValidation } from "../../schemas/token-refresh.mjs";
+import { JWTAuth, JWTLocalAuth } from "../../middlewares/jwt-auth.mjs";
+import { TokenRefreshSchema } from "../../schemas/token-refresh.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
 import { RefreshTokenValidator } from "../../middlewares/refresh-token-validator.mjs";
 import { createTokenPair, revokeToken } from "../../utils/jwt.mjs";
@@ -30,7 +29,7 @@ router.get("/signout", JWTAuth, async (request, response, next) => {
 router.post(
 	"/refresh",
 	JWTAuth,
-	TokenRefreshSchemaValidation,
+	TokenRefreshSchema,
 	SchemaValidator,
 	RefreshTokenValidator,
 	(request, response, next) => {

@@ -14,7 +14,7 @@ export function createMailToken(user, expiry) {
 }
 
 export function createAuthToken(payload, type) {
-	expiry =
+	const expiry =
 		type === "access"
 			? settings.ACCESS_TOKEN_EXPIRY
 			: settings.REFRESH_TOKEN_EXPIRY;

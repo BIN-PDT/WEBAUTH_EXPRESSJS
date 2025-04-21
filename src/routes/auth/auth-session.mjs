@@ -133,7 +133,7 @@ router.patch(
 	}
 );
 
-router.patch(
+router.get(
 	"/verify-email/:token",
 	MailTokenSchema,
 	SchemaValidator,

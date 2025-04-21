@@ -1,8 +1,8 @@
-import { Result } from "express-validator";
+import { validationResult } from "express-validator";
 import { APIResponse } from "../schemas/api-response.mjs";
 
 export function SchemaValidator(request, response, next) {
-	const result = Result(request);
+	const result = validationResult(request);
 	if (!result.isEmpty()) {
 		const errors = result.array().reduce((acc, err) => {
 			const { location, path, msg } = err;

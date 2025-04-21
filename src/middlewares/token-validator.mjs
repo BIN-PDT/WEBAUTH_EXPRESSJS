@@ -1,6 +1,6 @@
 import { APIResponse } from "../schemas/api-response.mjs";
-import { User } from "../models/user.mjs";
-import { checkRevokedToken, decodeToken } from "../utils/token.mjs";
+import { UserRepository } from "../repositories/user.mjs";
+import { findRevokedToken, decodeToken } from "../utils/token.mjs";
 
 export async function MailTokenValidator(request, response, next) {
 	const { params } = request;
@@ -14,27 +14,27 @@ export async function MailTokenValidator(request, response, next) {
 			.setMessage("Invalid credentials.")
 			.send(response);
 
-	const result = await checkRevokedToken(data.jti);
-	if (result.error) return next(error);
-	if (result.data)
-		return res
-			.setStatusCode(400)
-			.setMessage("Link has been used.")
-			.send(response);
+	try {
+		const token = await findRevokedToken(data.jti);
+		if (token)
+			return res
+				.setStatusCode(400)
+				.setMessage("Link has been used.")
+				.send(response);
 
-	User.findById(data.sub)
-		.then((user) => {
-			if (!user)
-				return res
-					.setStatusCode(404)
-					.setMessage("User not found.")
-					.send(response);
+		const user = await UserRepository.findById(data.sub);
+		if (!user)
+			return res
+				.setStatusCode(404)
+				.setMessage("User not found.")
+				.send(response);
 
-			request.payload = data;
-			request.user = user;
-			next();
-		})
-		.catch((error) => next(error));
+		request.payload = data;
+		request.user = user;
+		next();
+	} catch (error) {
+		next(error);
+	}
 }
 
 export function RefreshTokenValidator(request, response, next) {

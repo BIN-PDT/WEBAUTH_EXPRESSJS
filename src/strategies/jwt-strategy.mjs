@@ -1,8 +1,8 @@
 import passport from "passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { settings } from "../config/settings.mjs";
-import { User } from "../models/user.mjs";
-import { checkRevokedToken } from "../utils/token.mjs";
+import { UserRepository } from "../repositories/user.mjs";
+import { findRevokedToken } from "../utils/token.mjs";
 
 passport.use(
 	"jwt",
@@ -14,12 +14,11 @@ passport.use(
 		async (payload, done) => {
 			if (payload.type != "access") return done(null, null);
 
-			const { error, data } = await checkRevokedToken(payload.jti);
-			if (error) return done(error, null);
-			if (data) return done(null, null);
-
 			try {
-				const user = await User.findById(payload.sub);
+				const token = await findRevokedToken(payload.jti);
+				if (token) return done(null, null);
+
+				const user = await UserRepository.findById(payload.sub);
 				if (!user) return done(null, null);
 
 				return done(null, { payload, user });

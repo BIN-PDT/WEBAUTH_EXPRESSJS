@@ -1,6 +1,6 @@
 import passport from "passport";
 import { APIResponse } from "../../schemas/api-response.mjs";
-import { createAuthToken } from "../../utils/token.mjs";
+import { createAuthTokenPair } from "../../utils/token.mjs";
 
 export function JWTLocalAuth(request, response, next) {
 	passport.authenticate("local", (error, user) => {
@@ -10,7 +10,7 @@ export function JWTLocalAuth(request, response, next) {
 				.setMessage("Authenticated failed.")
 				.send(response);
 
-		request.user = { ...createAuthToken(user), user };
+		request.user = { ...createAuthTokenPair(user), user };
 		next();
 	})(request, response, next);
 }

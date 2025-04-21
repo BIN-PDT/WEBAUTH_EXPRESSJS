@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { matchedData } from "express-validator";
 import { APIResponse } from "../../schemas/api-response.mjs";
-import { User } from "../../models/user.mjs";
+import { UserRepository } from "../../repositories/user.mjs";
 import { SessionLocalAuth } from "../../middlewares/auth/session-auth.mjs";
 import { UserSignupSchema } from "../../schemas/user-signup.mjs";
 import { MailTokenSchema } from "../../schemas/mail-token.mjs";
@@ -19,7 +19,7 @@ import { LocalUserValidator } from "../../middlewares/user-validator.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
 import { MailTokenValidator } from "../../middlewares/token-validator.mjs";
 import { comparePassword, hashPassword } from "../../utils/password.mjs";
-import { revokeToken } from "../../utils/token.mjs";
+import { createRevokedToken } from "../../utils/token.mjs";
 import { mailResetPassword, mailVerifyEmail } from "../../utils/mail.mjs";
 
 export const router = Router();
@@ -33,19 +33,23 @@ router.post(
 		const res = new APIResponse(201);
 
 		try {
-			if (await User.findOne({ username: cleanedData.username }))
+			let query;
+
+			query = { username: cleanedData.username };
+			if (await UserRepository.findOne(query))
 				return res
 					.setStatusCode(409)
 					.setMessage("Username already in use.")
 					.send(response);
-			if (await User.findOne({ email: cleanedData.email }))
+			query = { email: cleanedData.email };
+			if (await UserRepository.findOne(query))
 				return res
 					.setStatusCode(409)
 					.setMessage("Email already in use.")
 					.send(response);
 
 			cleanedData.password = await hashPassword(cleanedData.password);
-			const newUser = await User.create(cleanedData);
+			const newUser = await UserRepository.create(cleanedData);
 			await mailVerifyEmail(request, newUser);
 
 			return res
@@ -93,7 +97,8 @@ router.post(
 		const { body } = request;
 
 		try {
-			const user = await User.findOne({ email: body.email });
+			const query = { email: body.email };
+			const user = await UserRepository.findOne(query);
 			if (user) await mailResetPassword(request, user);
 
 			return new APIResponse(200)
@@ -113,12 +118,11 @@ router.patch(
 	async (request, response, next) => {
 		const { body, user, payload } = request;
 
-		const { error } = await revokeToken(payload);
-		if (error) return next(error);
-
-		user.password = await hashPassword(body.password);
 		try {
-			user.save();
+			await createRevokedToken(payload);
+
+			user.password = await hashPassword(body.password);
+			await user.save();
 
 			return new APIResponse(200)
 				.setMessage("Confirmed password reset successfully.")
@@ -134,8 +138,8 @@ router.patch(
 	MailTokenSchema,
 	SchemaValidator,
 	MailTokenValidator,
-	(request, response, next) => {
-		const { user } = request;
+	async (request, response, next) => {
+		const { user, payload } = request;
 		const res = new APIResponse(200);
 
 		if (user.isVerified)
@@ -144,9 +148,11 @@ router.patch(
 				.setMessage("Email is verified.")
 				.send(response);
 
-		user.isVerified = true;
 		try {
-			user.save();
+			await createRevokedToken(payload);
+
+			user.isVerified = true;
+			await user.save();
 
 			return res
 				.setMessage("Verified email successfully.")
@@ -197,7 +203,7 @@ router.patch(
 
 		user.password = await hashPassword(body.password);
 		try {
-			user.save();
+			await user.save();
 
 			return res
 				.setMessage("Changed password successfully.")
@@ -219,7 +225,8 @@ router.patch(
 		const res = new APIResponse(200);
 
 		try {
-			if (await User.findOne({ email: body.email }))
+			const query = { email: body.email };
+			if (await UserRepository.findOne(query))
 				return res
 					.setStatusCode(409)
 					.setMessage("Email already in use.")
@@ -227,7 +234,7 @@ router.patch(
 
 			user.email = body.email;
 			user.isVerified = false;
-			user.save();
+			await user.save();
 
 			return res.setMessage("Changed email successfully.").send(response);
 		} catch (error) {
@@ -244,7 +251,8 @@ router.delete(
 		const res = new APIResponse(200);
 
 		try {
-			const { deletedCount } = await User.deleteOne({ _id: user.id });
+			const query = { _id: user.id };
+			const { deletedCount } = await UserRepository.deleteOne(query);
 			if (deletedCount == 0)
 				return res
 					.setStatusCode(404)

@@ -4,7 +4,7 @@ import { JWTAuth, JWTLocalAuth } from "../../middlewares/auth/jwt-auth.mjs";
 import { TokenRefreshSchema } from "../../schemas/token-refresh.mjs";
 import { SchemaValidator } from "../../middlewares/schema-validator.mjs";
 import { RefreshTokenValidator } from "../../middlewares/token-validator.mjs";
-import { createAuthToken, revokeToken } from "../../utils/token.mjs";
+import { createAuthToken, createRevokedToken } from "../../utils/token.mjs";
 
 export const router = Router();
 
@@ -15,15 +15,16 @@ router.post("/signin", JWTLocalAuth, (request, response) => {
 		.send(response);
 });
 
-router.get("/signout", JWTAuth, async (request, response, next) => {
+router.get("/signout", JWTAuth, (request, response, next) => {
 	const { payload } = request;
 
-	const { error } = await revokeToken(payload);
-	if (error) return next(error);
-
-	return new APIResponse(200)
-		.setMessage("Signed out successfully.")
-		.send(response);
+	createRevokedToken(payload)
+		.then((_) =>
+			new APIResponse(200)
+				.setMessage("Signed out successfully.")
+				.send(response)
+		)
+		.catch((error) => next(error));
 });
 
 router.post(
@@ -33,15 +34,16 @@ router.post(
 	SchemaValidator,
 	RefreshTokenValidator,
 	(request, response, next) => {
-		const { user, payload: accessPayload } = request;
+		const { user, payload } = request;
 
-		const { error } = revokeToken(accessPayload);
-		if (error) return next(error);
-
-		const tokenPair = createAuthToken(user);
-		return new APIResponse(200)
-			.setMessage("Refreshed tokens successfully.")
-			.setData(tokenPair)
-			.send(response);
+		createRevokedToken(payload)
+			.then((_) => {
+				const tokenPair = createAuthToken(user);
+				return new APIResponse(200)
+					.setMessage("Refreshed tokens successfully.")
+					.setData(tokenPair)
+					.send(response);
+			})
+			.catch((error) => next(error));
 	}
 );

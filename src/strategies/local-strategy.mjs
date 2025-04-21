@@ -1,13 +1,13 @@
 import passport from "passport";
 import { Strategy } from "passport-local";
-import { User } from "../models/user.mjs";
-import { SocialUser } from "../models/social-user.mjs";
+import { UserRepository } from "../repositories/user.mjs";
+import { SocialUserRepository } from "../repositories/social-user.mjs";
 import { comparePassword } from "../utils/password.mjs";
 
 passport.use(
 	"local",
 	new Strategy((username, password, done) => {
-		User.findOne({ username })
+		UserRepository.findOne({ username })
 			.then(async (user) => {
 				if (!user || !(await comparePassword(password, user.password)))
 					return done(null, null);
@@ -23,11 +23,8 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async ({ provider, id }, done) => {
-	try {
-		const UserModel = provider ? SocialUser : User;
-		const user = await UserModel.findById(id);
-		return done(null, user);
-	} catch (error) {
-		return done(error, null);
-	}
+	const UserModel = provider ? SocialUserRepository : UserRepository;
+	UserModel.findById(id)
+		.then((user) => done(null, user))
+		.catch((error) => done(error, null));
 });

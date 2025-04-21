@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy } from "passport-google-oauth20";
 import { settings } from "../config/settings.mjs";
-import { SocialUser } from "../models/social-user.mjs";
+import { SocialUserRepository } from "../repositories/social-user.mjs";
 
 passport.use(
 	new Strategy(
@@ -16,7 +16,10 @@ passport.use(
 
 			if (!email) return done(null, null);
 			try {
-				let user = await SocialUser.findOne({ provider, userId });
+				let user;
+
+				const query = { provider, userId };
+				user = await SocialUserRepository.findOne(query);
 				if (user) {
 					if (user.email != email) {
 						user.email = email;
@@ -25,7 +28,8 @@ passport.use(
 					return done(null, user);
 				}
 
-				user = await SocialUser.create({ provider, userId, email });
+				const data = { provider, userId, email };
+				user = await SocialUserRepository.create(data);
 				return done(null, user);
 			} catch (error) {
 				return done(error, null);
